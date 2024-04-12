@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const generateAuthToken = (user) => {
   const payload = {
@@ -9,12 +12,12 @@ export const generateAuthToken = (user) => {
     fullname: `${user.firstName} ${user.lastName}`,
   };
   console.log(payload, user.firstname, user.lastname);
-  const token = jwt.sign(payload, "top_secret_key", { expiresIn: "1hr" });
+  const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1hr" });
   return token;
 };
 
 export const hashPassword = async (password) => {
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(parseInt(process.env.SALT_LENGTH));
   return bcrypt.hash(password, salt);
 };
 
