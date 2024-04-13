@@ -1,11 +1,16 @@
 import * as userService from "./user.service.js";
+import logger from "../../utils/logger.js";
+import { responseCodes, sendResponse } from "../../utils/sendResponse.js";
 
 export const signup = async (req, res) => {
   try {
     const { user } = await userService.signup(req.body);
-    res.status(201).json({ user });
+    return sendResponse(res, responseCodes.CREATED, { user });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    logger.error(`Error signing up user: ${error.message}`);
+    return sendResponse(res, responseCodes.BAD_REQUEST, {
+      message: error.message,
+    });
   }
 };
 
@@ -13,8 +18,11 @@ export const login = async (req, res) => {
   try {
     console.log(req.body);
     const { token } = await userService.login(req, res);
-    res.status(200).json({ token });
+    return sendResponse(res, responseCodes.SUCCESS, { token });
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    logger.error(`Error logging in user: ${error.message}`);
+    return sendResponse(res, responseCodes.UNAUTHORIZED, {
+      message: error.message,
+    });
   }
 };
