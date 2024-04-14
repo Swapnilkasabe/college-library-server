@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
 
 const validateSignup = [
   body("username")
@@ -20,4 +20,11 @@ const validateLogin = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-export { validateSignup, validateLogin };
+const validateForgotPassword = [
+  body("email").isEmail().withMessage("Email is required"),
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters"),
+];
+
+export { validateSignup, validateLogin, validateForgotPassword };

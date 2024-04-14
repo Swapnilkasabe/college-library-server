@@ -72,3 +72,34 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const forgotPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return sendResponse(res, responseCodes.BAD_REQUEST, {
+        errors: errors.array(),
+      });
+    }
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return sendResponse(res, responseCodes.NOT_FOUND, {
+        error: "User not found",
+      });
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    user.password = hashedPassword;
+    const token = generateAuthToken(user);
+    await user.save();
+    return sendResponse(res, responseCodes.SUCCESS, {
+      message: "Password updated successfully",
+      token,
+    });
+  } catch (error) {
+    logger.error(`Error resetting password: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};
