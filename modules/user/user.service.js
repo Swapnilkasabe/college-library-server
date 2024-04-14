@@ -8,7 +8,7 @@ import logger from "../../utils/logger.js";
 import { responseCodes, sendResponse } from "../../utils/sendResponse.js";
 import { validationResult } from "express-validator";
 
-export const signup = async (userData) => {
+export const signup = async (req, res) => {
   const srcFn = "signup";
   try {
     const errors = validationResult(req);
@@ -17,15 +17,24 @@ export const signup = async (userData) => {
         errors: errors.array(),
       });
     }
-    const { password, ...otherData } = userData;
+    const { username, email, password, firstName, lastName, role } = req.body;
     const hashedPassword = await hashPassword(password);
-    const newUser = new UserModel({ ...otherData, password: hashedPassword });
+    const newUser = new UserModel({
+      username,
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      role,
+    });
     await newUser.save();
     logger.info(`Signed up successfully: ${newUser._id}`);
     return { user: newUser._id };
   } catch (error) {
     logger.error(`Error signing up user: ${error.message}`);
-    throw new Error("Error signing up user");
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
   }
 };
 
@@ -48,7 +57,7 @@ export const login = async (req, res) => {
     }
     const isPasswordMatch = await verifyPassword(password, user.password);
     if (!isPasswordMatch) {
-      logger.warn(`IIncorrect password provided for user: ${user._id}`);
+      logger.warn(`Incorrect password provided for user: ${user._id}`);
       return sendResponse(res, responseCodes.UNAUTHORIZED, {
         error: "Incorrect password",
       });
@@ -58,7 +67,8 @@ export const login = async (req, res) => {
     logger.info(`User logged in successfully: ${user._id}`);
     return sendResponse(res, responseCodes.SUCCESS, { token });
   } catch (error) {
-    logger.error(`Error logging in user: ${error.message}`);
-    throw new Error("Error logging in user");
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
   }
 };

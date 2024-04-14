@@ -13,7 +13,6 @@ export const generateAuthToken = (user) => {
     role: user.role,
     fullname: `${user.firstName} ${user.lastName}`,
   };
-  console.log(payload, user.firstname, user.lastname);
   const token = jwt.sign(payload, config.SECRET_KEY, { expiresIn: "1hr" });
   return token;
 };

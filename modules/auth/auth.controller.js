@@ -16,7 +16,6 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log(req.body);
     const { token } = await userService.login(req, res);
     return sendResponse(res, responseCodes.SUCCESS, { token });
   } catch (error) {
