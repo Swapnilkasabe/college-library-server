@@ -1,6 +1,7 @@
 import * as userService from "./user.service.js";
 import logger from "../../utils/logger.js";
-import { responseCodes, sendResponse } from "../../utils/sendResponse.js";
+import sendResponse from "../../utils/sendResponse.js";
+import { responseCodes } from "../../utils/constants.js";
 
 export const signup = async (req, res) => {
   try {

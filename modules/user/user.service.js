@@ -5,7 +5,8 @@ import {
   verifyPassword,
 } from "../auth/auth.service.js";
 import logger from "../../utils/logger.js";
-import { responseCodes, sendResponse } from "../../utils/sendResponse.js";
+import sendResponse from "../../utils/sendResponse.js";
+import { responseCodes } from "../../utils/constants.js";
 import { validationResult } from "express-validator";
 
 export const signup = async (req, res) => {
