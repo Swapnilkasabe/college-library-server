@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import logger from "../../utils/logger.js";
+import config from "../../config/config.js";
 
 dotenv.config();
 
@@ -11,16 +13,25 @@ export const generateAuthToken = (user) => {
     role: user.role,
     fullname: `${user.firstName} ${user.lastName}`,
   };
-  console.log(payload, user.firstname, user.lastname);
-  const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1hr" });
+  const token = jwt.sign(payload, config.SECRET_KEY, { expiresIn: "1hr" });
   return token;
 };
 
 export const hashPassword = async (password) => {
-  const salt = await bcrypt.genSalt(parseInt(process.env.SALT_LENGTH));
-  return bcrypt.hash(password, salt);
+  try {
+    const salt = await bcrypt.genSalt(parseInt(config.SALT_LENGTH));
+    return bcrypt.hash(password, salt);
+  } catch (error) {
+    logger.error(`Error hashing password: ${error.message}`);
+    throw error;
+  }
 };
 
 export const verifyPassword = async (password, hashedPassword) => {
-  return await bcrypt.compare(password, hashedPassword);
+  try {
+    return await bcrypt.compare(password, hashedPassword);
+  } catch (error) {
+    logger.error(`Error verifying password: ${error.message}`);
+    throw error;
+  }
 };
