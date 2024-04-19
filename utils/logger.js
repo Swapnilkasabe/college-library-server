@@ -1,5 +1,6 @@
 import winston from "winston";
 
+// Configuration of a Winston logger
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
