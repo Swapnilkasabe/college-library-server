@@ -2,7 +2,7 @@ import logger from "../../utils/logger.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import { responseCodes } from "../../utils/constants.js";
 import studentService from "./student.service.js";
-
+import { validation } from "../../utils/validation.js";
 const studentController = {
   // Retrieve all students using the student service and send the response
   getAllStudents: async (req, res) => {
@@ -38,12 +38,7 @@ const studentController = {
   // Create a student using the student service and send the response
   createStudent: async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return sendResponse(res, responseCodes.BAD_REQUEST, {
-          errors: errors.array(),
-        });
-      }
+      validation(req, res, () => {});
       const { fullName, studentId, email, phoneNumber } = req.body;
       const newStudent = await studentService.createStudent(
         fullName,
@@ -64,11 +59,7 @@ const studentController = {
   },
   // Update a student by thier ID using the student service and send the response
   updateStudent: async (req, res) => {
-    if (!errors.isEmpty()) {
-      return sendResponse(res, responseCodes.BAD_REQUEST, {
-        errors: errors.array(),
-      });
-    }
+    validation(req, res, () => {});
     const id = req.params.id;
     const { fullName, email, phoneNumber } = req.body;
     try {

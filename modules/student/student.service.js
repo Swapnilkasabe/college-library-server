@@ -83,7 +83,7 @@ const studentService = {
   // Soft delete a student by their ID
   deleteStudent: async (id) => {
     try {
-      const deletedStudent = await findByIdAndUpdate(
+      const deletedStudent = await Student.findByIdAndUpdate(
         id,
         { isDeleted: true },
         { new: true }

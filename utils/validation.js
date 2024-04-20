@@ -1,5 +1,19 @@
 import { body } from "express-validator";
 
+import { validationResult } from "express-validator";
+import { sendResponse } from "./sendResponse.js";
+import { responseCodes } from "./constants.js";
+
+//Validation middleware to intercept and process requests
+const validation = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendResponse(res, responseCodes.BAD_REQUEST, {
+      errors: errors.array(),
+    });
+  }
+};
+
 // Validation function for user signup
 const validateSignup = [
   body("username")
@@ -45,10 +59,28 @@ const validateStudentUpdate = [
   body("phoneNumber").trim().notEmpty().withMessage("Phone number is required"),
 ];
 
+// Validation functions for book creation
+const validateBookCreation = [
+  body("title").trim().notEmpty().withMessage("Title is required"),
+  body("author").trim().notEmpty().withMessage("Author is required"),
+  body("description").trim().notEmpty().withMessage("Description is required"),
+  body("bookId").trim().notEmpty().withMessage("Book ID is required"),
+];
+
+// Validation function for book update
+const validateBookUpdate = [
+  body("title").trim().notEmpty().withMessage("Title is required"),
+  body("author").trim().notEmpty().withMessage("Author is required"),
+  body("description").trim().notEmpty().withMessage("Description is required"),
+];
+
 export {
   validateSignup,
   validateLogin,
   validateForgotPassword,
   validateStudentCreation,
   validateStudentUpdate,
+  validateBookCreation,
+  validateBookUpdate,
+  validation,
 };

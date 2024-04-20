@@ -29,6 +29,6 @@ router.put(
 );
 
 // Delete a student (private route with admin authorization)
-router.delete("/", authorizeAdmin, studentController.deleteStudent);
+router.delete("/:id", authorizeAdmin, studentController.deleteStudent);
 
 export default router;
