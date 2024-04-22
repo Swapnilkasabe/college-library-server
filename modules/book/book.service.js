@@ -7,7 +7,7 @@ const bookService = {
   // Retrieve all books from the database
   getAllBooks: async () => {
     try {
-      const books = await Book.find();
+      const books = await Book.find({ isDeleted: false });
       if (isNotEmptyArray(books)) {
         logger.info(`Books retrieved successfully: ${books}`);
         return books;
