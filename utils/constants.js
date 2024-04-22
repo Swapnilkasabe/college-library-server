@@ -1,3 +1,4 @@
+//Common HTTP response status codes to be sent along with data in the response
 export const responseCodes = {
   SUCCESS: 200,
   CREATED: 201,
@@ -5,5 +6,6 @@ export const responseCodes = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
 };
