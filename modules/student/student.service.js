@@ -6,11 +6,12 @@ const studentService = {
   // Retrieve all students from the database
   getAllStudents: async () => {
     try {
-      const students = await Student.find();
+      const students = await Student.find({ isDeleted: false });
       if (isNotEmptyArray(students)) {
         logger.info(`Students retrieved successfully: ${students}`);
+      } else {
+        logger.info("No student found");
       }
-      logger.info("No student found");
       return students;
     } catch (error) {
       logger.error(`Error retrieving students : ${error.message}`);
