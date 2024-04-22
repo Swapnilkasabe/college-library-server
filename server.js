@@ -5,6 +5,7 @@ import dbConnect from "./config/database.js";
 import config from "./config/config.js";
 import logger from "./utils/logger.js";
 import studentRoutes from "./routes/studentRoutes.js";
+import bookRoutes from "./routes/bookRoutes.js";
 
 // Load environment variables from a .env file
 dotenv.config();
@@ -20,6 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Mount student routes on the '/api/students' path for student management functionalities
 app.use("/api/students", studentRoutes);
+
+// Mount book routes on the '/api/books' path for book management functionalities
+app.use("/api/books", bookRoutes);
 
 const PORT = config.PORT || 5000;
 
