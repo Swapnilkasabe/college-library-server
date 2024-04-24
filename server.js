@@ -6,6 +6,7 @@ import config from "./config/config.js";
 import logger from "./utils/logger.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js";
+import bookTransactionRoutes from "./routes/bookTransactionRoutes.js";
 
 // Load environment variables from a .env file
 dotenv.config();
@@ -25,9 +26,15 @@ app.use("/api/students", studentRoutes);
 // Mount book routes on the '/api/books' path for book management functionalities
 app.use("/api/books", bookRoutes);
 
+// Mount book transaction routes on the 'api/book-transactions' path for book transactions management functionalities
+app.use("/api/book-transactions", bookTransactionRoutes);
+
 const PORT = config.PORT || 5000;
 
 // Connect to the database
-await dbConnect();
-
-app.listen(PORT, () => logger.info(`Server is running on port ${PORT}`));
+try {
+  await dbConnect();
+  app.listen(PORT, () => logger.info(`Server is running on port ${PORT}`));
+} catch (error) {
+  logger.error(`Error connecting to the database: ${error.message}`);
+}
