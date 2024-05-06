@@ -11,7 +11,6 @@ export const generateAuthToken = (user) => {
     username: user.username,
     email: user.email,
     role: user.role,
-    fullname: `${user.firstName} ${user.lastName}`,
   };
   const token = jwt.sign(payload, config.SECRET_KEY, { expiresIn: "1hr" });
   return token;

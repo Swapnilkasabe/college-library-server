@@ -10,10 +10,10 @@ const bookService = {
       const books = await Book.find({ isDeleted: false });
       if (isNotEmptyArray(books)) {
         logger.info(`Books retrieved successfully: ${books}`);
-        return books;
+      } else {
+        logger.info("No Book found");
       }
-      logger.info("No books found");
-      return []; // Return an empty array if no books found
+      return books;
     } catch (error) {
       logger.error(`Error retrieving books: ${error.message}`);
       throw new Error(error.message);
@@ -21,13 +21,15 @@ const bookService = {
   },
 
   // Retrieve a book by their ID from the database
-  getBookById: async (bookId) => {
+  getBookById: async (id) => {
     try {
-      const book = await Book.find({ _id: id, isDeleted: false });
-      if (isNotEmptyArray(book)) {
-        logger.info(`Books retrieved successfully: ${book.title}`);
+      const book = await Book.find({ bookId: id, isDeleted: false });
+      if (!isNotEmptyArray(book)) {
+        logger.info("No Book found");
+        throw new Error("Book not found");
       }
-      logger.info("Book not found");
+      logger.info(`Book retrieved successfully: ${book[0].title}`);
+      return book[0];
     } catch (error) {
       logger.error(`Error retrieving book: ${error.message}`);
       throw new Error(error.message);
@@ -35,13 +37,18 @@ const bookService = {
   },
 
   // Create a book
-  createBook: async (title, author, description, bookId) => {
-    const existingBook = await Book.find({ bookId: bookId, isDeleted: false });
-    if (isNotEmptyArray(existingBook)) {
-      logger.error("Book with provided ID already exists");
-      throw new Error("Book with provided ID already exists");
-    }
+  createBook: async (bookData) => {
+    const { title, author, description, bookId } = bookData;
     try {
+      const existingBook = await Book.find({
+        bookId: bookId,
+        isDeleted: true,
+      });
+      if (isNotEmptyArray(existingBook)) {
+        logger.error("Book with provided ID already exists");
+        throw new Error("Book with provided ID already exists");
+      }
+
       const newBook = new Book({
         title,
         author,
@@ -50,7 +57,11 @@ const bookService = {
       });
       const savedBook = await newBook.save();
       logger.info(`Book created successfully: ${savedBook.title}`);
-      return savedBook;
+      return {
+        status: "success",
+        message: "Book created successfully",
+        data: savedBook,
+      };
     } catch (error) {
       logger.error(`Error creating book:${error.message}`);
       throw new Error(error.message);
@@ -60,17 +71,17 @@ const bookService = {
   // Update a book by their ID
   updateBookById: async (id, title, author, description) => {
     try {
-      const updatedBook = await Book.findByIdAndUpdate(
-        id,
-        { title, author, description },
-        { new: true }
-      );
-      if (!updatedBook) {
+      const updatedBook = await Book.find({ bookId: id, isDeleted: false });
+      if (!updatedBook[0]) {
         logger.info("Book not found");
         throw new Error("Book not found");
       }
-      logger.info(`Book updated successfully: ${updatedBook.title}`);
-      return updatedBook;
+      updatedBook[0].title = title;
+      updatedBook[0].author = author;
+      updatedBook[0].description = description;
+      await updatedBook[0].save();
+      logger.info(`Book updated successfully: ${updatedBook[0].title}`);
+      return updatedBook[0];
     } catch (error) {
       logger.error(`Error updating book: ${error.message}`);
       throw new Error(error.message);
@@ -80,8 +91,8 @@ const bookService = {
   // Soft delete a book by their ID
   deleteBookById: async (id) => {
     try {
-      const deletedBook = await Book.findByIdAndUpdate(
-        id,
+      const deletedBook = await Book.findOneAndUpdate(
+        { bookId: id, isDeleted: false },
         { isDeleted: true },
         { new: true }
       );
@@ -90,10 +101,10 @@ const bookService = {
         throw new Error("Book not found");
       }
       logger.info(`Book soft deleted successfully: ${deletedBook.title}`);
-      return deletedBook;
+      return true;
     } catch (error) {
       logger.error(`Error deleting book: ${error.message}`);
-      throw new error(error.message);
+      return false;
     }
   },
 };

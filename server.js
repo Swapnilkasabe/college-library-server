@@ -7,6 +7,7 @@ import logger from "./utils/logger.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js";
 import bookTransactionRoutes from "./routes/bookTransactionRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 // Load environment variables from a .env file
 dotenv.config();
@@ -28,6 +29,9 @@ app.use("/api/books", bookRoutes);
 
 // Mount book transaction routes on the 'api/book-transactions' path for book transactions management functionalities
 app.use("/api/book-transactions", bookTransactionRoutes);
+
+// Mount user routes on the '/api/users' path for user management functionalities
+app.use("/api/users", userRoutes);
 
 const PORT = config.PORT || 5000;
 
