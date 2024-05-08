@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import bookTransactionController from "../modules/booklending/bookTransaction.controller.js";
+import bookTransactionController from "../modules/bookTransactions/bookTransaction.controller.js";
 
 //Create a new book lending record
 router.post("/", bookTransactionController.createLending);

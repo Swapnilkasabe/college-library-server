@@ -2,8 +2,6 @@ import bookService from "./book.service.js";
 import logger from "../../utils/logger.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import { responseCodes } from "../../utils/constants.js";
-import { validationResult } from "express-validator";
-import { validation } from "../../utils/validation.js";
 
 const bookController = {
   // Retrieve all books using the book service and send the response
@@ -25,8 +23,8 @@ const bookController = {
     const id = req.params.id;
     try {
       const book = await bookService.getBookById(id);
-      sendResponse(res, responseCodes.SUCCESS, { book });
-      logger.info(`Book retrieved successfully: ${book.title}`);
+      sendResponse(res, responseCodes.SUCCESS, book[0]);
+      logger.info(`Book retrieved successfully: ${book[0].title}`);
     } catch (error) {
       logger.error(`Error retrieving book: ${error.message}`);
       sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
@@ -38,14 +36,8 @@ const bookController = {
   // Create a book using the book service and send the response
   createBook: async (req, res) => {
     try {
-      validation(req, res, () => {});
-      const { title, author, description, bookId } = req.body;
-      const newBook = await bookService.createBook(
-        title,
-        author,
-        description,
-        bookId
-      );
+      const newBook = await bookService.createBook(req.body);
+      logger.info(`Book created successfully: ${newBook.title}`);
       sendResponse(res, responseCodes.CREATED, {
         message: "Book created successfully",
         book: newBook,
@@ -60,11 +52,10 @@ const bookController = {
 
   // Update a book by thier ID using the book service and send the response
   updateBookById: async (req, res) => {
-    const errors = validationResult(req);
-    validation(req, res, () => {});
     const id = req.params.id;
+    const { title, author, description } = req.body;
+
     try {
-      const { title, author, description } = req.body;
       const updatedBook = await bookService.updateBookById(
         id,
         title,
@@ -84,20 +75,11 @@ const bookController = {
   // Soft delete a book by thier ID using the book service and send the response
   deleteBookById: async (req, res) => {
     const id = req.params.id;
-    try {
-      const deletedBook = await bookService.deleteBookById(id);
-      sendResponse(
-        res,
-        responseCodes.SUCCESS,
-        `Book deleted successfully: ${deletedBook.title}`
-      );
-      logger.info(`Book deleted successfully: ${deletedBook.title}`);
-    } catch (error) {
-      logger.error(`Error deleting book: ${error.message}`);
-      sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
-        error: error.message,
-      });
+    const deletedBook = await bookService.deleteBookById(id);
+    if (deletedBook) {
+      return sendResponse(res, responseCodes.SUCCESS, { id });
     }
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, { id });
   },
 };
 

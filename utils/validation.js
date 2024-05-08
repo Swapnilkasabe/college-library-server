@@ -1,6 +1,4 @@
-import { body } from "express-validator";
-
-import { validationResult } from "express-validator";
+import { body, validationResult } from "express-validator";
 import { sendResponse } from "./sendResponse.js";
 import { responseCodes } from "./constants.js";
 
@@ -12,22 +10,24 @@ const validation = (req, res, next) => {
       errors: errors.array(),
     });
   }
+  next();
 };
 
 // Validation function for user signup
 const validateSignup = [
-  body("username")
-    .trim()
-    .notEmpty()
-    .withMessage("Username is required")
-    .isLength({ min: 3 })
-    .withMessage("Username must be at least 3 characters")
-    .isAlphanumeric()
-    .withMessage("Username can only contain letters and numbers"),
+  body("username").trim().notEmpty().withMessage("Username is required"),
   body("email").isEmail().withMessage("Invalid email format"),
   body("password")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .isLength({ min: 4, max: 10 })
+    .withMessage(
+      "Password must be at least 4 characters and maximum 10 characters"
+    ),
+  body("confirmPassword").custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error("Passwords do not match");
+    }
+    return true;
+  }),
 ];
 
 // Validation function for user login
@@ -36,17 +36,27 @@ const validateLogin = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-// Validation function for forgot password request
-const validateForgotPassword = [
-  body("email").isEmail().withMessage("Email is required"),
+// Validation function to check if the email exists
+const validateCheckEmailExists = [
+  body("email").isEmail().withMessage("Invalid email format"),
+];
+
+// Validation function for reset password request
+const validateResetPassword = [
   body("newPassword")
-    .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters"),
+    .isLength({ min: 4 })
+    .withMessage("New password must be at least 4 characters"),
+  body("confirmNewPassword").custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error("Passwords do not match");
+    }
+    return true;
+  }),
 ];
 
 // Validation functions for student creation
 const validateStudentCreation = [
-  body("fullName").trim().notEmpty().withMessage("Full Name is required"),
+  body("name").trim().notEmpty().withMessage("Name is required"),
   body("studentId").trim().notEmpty().withMessage("Student ID is required"),
   body("email").isEmail().withMessage("Invalid email format"),
   body("phoneNumber").trim().notEmpty().withMessage("Phone Number is required"),
@@ -54,7 +64,7 @@ const validateStudentCreation = [
 
 // Validation functions for student update
 const validateStudentUpdate = [
-  body("fullName").trim().notEmpty().withMessage("Full name is required"),
+  body("name").trim().notEmpty().withMessage("Name is required"),
   body("email").isEmail().withMessage("Invalid email format"),
   body("phoneNumber").trim().notEmpty().withMessage("Phone number is required"),
 ];
@@ -77,7 +87,8 @@ const validateBookUpdate = [
 export {
   validateSignup,
   validateLogin,
-  validateForgotPassword,
+  validateCheckEmailExists,
+  validateResetPassword,
   validateStudentCreation,
   validateStudentUpdate,
   validateBookCreation,

@@ -5,32 +5,28 @@ import {
   verifyPassword,
 } from "../auth/auth.service.js";
 import logger from "../../utils/logger.js";
-import sendResponse from "../../utils/sendResponse.js";
+import { sendResponse } from "../../utils/sendResponse.js";
 import { responseCodes } from "../../utils/constants.js";
-import { validationResult } from "express-validator";
 
+// User signup
 export const signup = async (req, res) => {
   const srcFn = "signup";
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(res, responseCodes.BAD_REQUEST, {
-        errors: errors.array(),
-      });
-    }
-    const { username, email, password, firstName, lastName, role } = req.body;
+    const { username, email, password, role } = req.body;
     const hashedPassword = await hashPassword(password);
     const newUser = new UserModel({
       username,
       email,
       password: hashedPassword,
-      firstName,
-      lastName,
       role,
     });
     await newUser.save();
     logger.info(`Signed up successfully: ${newUser._id}`);
-    return { user: newUser._id };
+    return sendResponse(res, responseCodes.SUCCESS, {
+      success: true,
+      message: "User signed up successfully",
+      user: newUser._id,
+    });
   } catch (error) {
     logger.error(`Error signing up user: ${error.message}`);
     return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
@@ -39,15 +35,10 @@ export const signup = async (req, res) => {
   }
 };
 
+// User login
 export const login = async (req, res) => {
   const srcFn = "login";
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(res, responseCodes.BAD_REQUEST, {
-        errors: errors.array(),
-      });
-    }
     const { email, password } = req.body;
     const user = await UserModel.findOne({ email });
     if (!user) {
@@ -66,7 +57,11 @@ export const login = async (req, res) => {
 
     const token = generateAuthToken(user);
     logger.info(`User logged in successfully: ${user._id}`);
-    return sendResponse(res, responseCodes.SUCCESS, { token });
+    return sendResponse(res, responseCodes.SUCCESS, {
+      success: true,
+      message: "Login successful",
+      token,
+    });
   } catch (error) {
     return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
       error: error.message,
@@ -74,26 +69,55 @@ export const login = async (req, res) => {
   }
 };
 
-export const forgotPassword = async (req, res) => {
-  const { email, newPassword } = req.body;
+//Checking if the email exists for password reset
+export const checkEmailExists = async (req, res) => {
+  const { email } = req.body;
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(res, responseCodes.BAD_REQUEST, {
-        errors: errors.array(),
+    const user = await UserModel.findOne({
+      email,
+    });
+    if (user) {
+      return sendResponse(res, responseCodes.SUCCESS, {
+        emailExists: true,
+        success: true,
+        message: "Email verified",
       });
+    } else {
+      return sendResponse(res, responseCodes.NOT_FOUND, { emailExists: false });
     }
-    const user = await UserModel.findOne({ email });
+  } catch (error) {
+    logger.error(`Error checking email existence: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};
+
+//Reset password
+export const resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    // Fetch the user from the database
+    const user = await UserModel.findOne({
+      email,
+    });
+
     if (!user) {
       return sendResponse(res, responseCodes.NOT_FOUND, {
         error: "User not found",
       });
     }
+    // Hash the new password
     const hashedPassword = await hashPassword(newPassword);
+
+    // Update the user's password and save the changes
     user.password = hashedPassword;
     const token = generateAuthToken(user);
     await user.save();
+    // Send success response
     return sendResponse(res, responseCodes.SUCCESS, {
+      success: true,
       message: "Password updated successfully",
       token,
     });

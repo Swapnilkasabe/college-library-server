@@ -5,6 +5,7 @@ import bookController from "../modules/book/book.controller.js";
 import {
   validateBookCreation,
   validateBookUpdate,
+  validation,
 } from "../utils/validation.js";
 import { authorizeAdmin } from "../modules/auth/auth.controller.js";
 
@@ -18,6 +19,7 @@ router.post(
   "/",
   authorizeAdmin,
   validateBookCreation,
+  validation,
   bookController.createBook
 );
 
@@ -26,6 +28,7 @@ router.put(
   "/:id",
   authorizeAdmin,
   validateBookUpdate,
+  validation,
   bookController.updateBookById
 );
 
