@@ -42,3 +42,17 @@ export const login = async (req, res) => {
     });
   }
 };
+
+// Function to handle user logout request
+export const logout = async (req, res) => {
+  try {
+    return sendResponse(res, responseCodes.SUCCESS, {
+      message: "Logout successful",
+    });
+  } catch (error) {
+    logger.error(`Error logging out: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};

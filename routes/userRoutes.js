@@ -22,5 +22,6 @@ router.post(
   validateResetPassword,
   userController.checkEmailExists
 );
+router.post("/logout", userController.logout);
 
 export default router;

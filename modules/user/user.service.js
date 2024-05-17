@@ -128,3 +128,17 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+
+// Logout service function
+export const logout = async (req, res) => {
+  try {
+    return sendResponse(res, responseCodes.SUCCESS, {
+      message: "Logout successful",
+    });
+  } catch (error) {
+    logger.error(`Error logging out: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};
