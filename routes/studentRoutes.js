@@ -6,15 +6,17 @@ import {
   validateStudentUpdate,
 } from "../utils/validation.js";
 import { authorizeAdmin } from "../modules/auth/auth.controller.js";
+import { verifyToken } from "../modules/auth/auth.service.js";
 
 // Get all students (public route)
-router.get("/", studentController.getAllStudents);
+router.get("/", verifyToken, studentController.getAllStudents);
 // Get a student by ID (public route)
-router.get("/:id", studentController.getStudentById);
+router.get("/:id", verifyToken, studentController.getStudentById);
 
 // Create a new student (private route with admin authorization)
 router.post(
   "/",
+  verifyToken,
   validateStudentCreation,
   authorizeAdmin,
   studentController.createStudent
@@ -23,12 +25,18 @@ router.post(
 // Update a student (private route with admin authorization)
 router.put(
   "/:id",
+  verifyToken,
   validateStudentUpdate,
   authorizeAdmin,
   studentController.updateStudent
 );
 
 // Delete a student (private route with admin authorization)
-router.delete("/:id", authorizeAdmin, studentController.deleteStudent);
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeAdmin,
+  studentController.deleteStudent
+);
 
 export default router;

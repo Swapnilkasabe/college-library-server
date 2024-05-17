@@ -3,9 +3,12 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import logger from "../../utils/logger.js";
 import config from "../../config/config.js";
+import isNotEmptyArray from "../../utils/helpers.js";
+import { sendResponse } from "../../utils/sendResponse.js";
 
 dotenv.config();
 
+//Fuction to generate auth token
 export const generateAuthToken = (user) => {
   const payload = {
     username: user.username,
@@ -16,6 +19,26 @@ export const generateAuthToken = (user) => {
   return token;
 };
 
+//Function to verify token
+export const verifyToken = (req, res, next) => {
+  try {
+    const token = req.header("Authorization")?.split(" ");
+    if (!isNotEmptyArray(token))
+      return sendResponse(res, responseCodes.UNAUTHORIZED, {
+        error: "Access denied",
+      });
+    const decodedToken = jwt.verify(token[1], config.SECRET_KEY);
+    req.email = decodedToken.email;
+    next();
+  } catch (error) {
+    logger.error(`Error verifying token: ${error.message}`);
+    sendResponse(res, responseCodes.UNAUTHORIZED, {
+      error: "Invalid token",
+    });
+  }
+};
+
+//Function to hash password
 export const hashPassword = async (password) => {
   try {
     const salt = await bcrypt.genSalt(parseInt(config.SALT_LENGTH));
@@ -26,6 +49,7 @@ export const hashPassword = async (password) => {
   }
 };
 
+//Fuction to verify password
 export const verifyPassword = async (password, hashedPassword) => {
   try {
     return await bcrypt.compare(password, hashedPassword);
