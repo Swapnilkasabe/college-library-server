@@ -9,6 +9,7 @@ const bookSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  status: { type: String, default: "available" },
   isDeleted: { type: Boolean, default: false },
 });
 

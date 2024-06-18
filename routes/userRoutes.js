@@ -7,6 +7,7 @@ import {
   validateResetPassword,
   validateCheckEmailExists,
 } from "../utils/validation.js";
+import authMiddleware from "../utils/authMiddleware.js";
 
 const router = express.Router();
 
@@ -23,5 +24,7 @@ router.post(
   userController.checkEmailExists
 );
 router.post("/logout", userController.logout);
+
+router.get("/profile", userController.getProfile);
 
 export default router;

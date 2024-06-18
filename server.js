@@ -14,8 +14,14 @@ dotenv.config();
 
 const app = express();
 
+// Define the CORS options
+const corsOptions = {
+  credentials: true,
+  origin: ["http://localhost:3000", "https://college-library-ui.vercel.app/"], // Whitelist the domains you want to allow
+};
+
 // Enable CORS for all routes
-app.use(cors());
+app.use(cors(corsOptions));
 // Parse incoming JSON data
 app.use(express.json({ extended: true }));
 // Parse URL-encoded form data
