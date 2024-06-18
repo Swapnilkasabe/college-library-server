@@ -7,8 +7,12 @@ const studentController = {
   // Retrieve all students using the student service and send the response
   getAllStudents: async (req, res) => {
     try {
-      const students = await studentService.getAllStudents();
-      sendResponse(res, responseCodes.SUCCESS, { students });
+      const { students, totalStudentsCount } =
+        await studentService.getAllStudents();
+      sendResponse(res, responseCodes.SUCCESS, {
+        students,
+        totalStudentsCount,
+      });
       logger.info(`Students retrieved successfully: ${students}`);
     } catch (error) {
       logger.error(`Error retrieving students: ${error.message}`);
@@ -23,7 +27,13 @@ const studentController = {
     const id = req.params.id;
     try {
       const student = await studentService.getStudentById(id);
-      sendResponse(res, responseCodes.SUCCESS, student[0]);
+      if (!student) {
+        logger.info(`Student not found with id: ${id}`);
+        return sendResponse(res, responseCodes.NOT_FOUND, {
+          error: "Student not found",
+        });
+      }
+      sendResponse(res, responseCodes.SUCCESS, student);
       logger.info(`Student retrieved successfully: ${student[0].name}`);
     } catch (error) {
       logger.error(`Error retrieving student: ${error.message}`);

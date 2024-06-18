@@ -18,7 +18,7 @@ router.post(
   "/",
   verifyToken,
   validateStudentCreation,
-  authorizeAdmin,
+  // authorizeAdmin,
   studentController.createStudent
 );
 
@@ -27,7 +27,7 @@ router.put(
   "/:id",
   verifyToken,
   validateStudentUpdate,
-  authorizeAdmin,
+  // authorizeAdmin,
   studentController.updateStudent
 );
 
@@ -35,7 +35,7 @@ router.put(
 router.delete(
   "/:id",
   verifyToken,
-  authorizeAdmin,
+  // authorizeAdmin,
   studentController.deleteStudent
 );
 

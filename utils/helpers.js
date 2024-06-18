@@ -1,6 +1,11 @@
 // Helper function to check if an array is not empty
-const isNotEmptyArray = (array) => {
+export const isNotEmptyArray = (array) => {
   return Array.isArray(array) && array.length > 0;
 };
 
-export default isNotEmptyArray;
+// Helper function to set set date format
+export const setDueDate = (minutes) => {
+  const dueDate = new Date();
+  dueDate.setMinutes(dueDate.getMinutes() + minutes);
+  return dueDate;
+};

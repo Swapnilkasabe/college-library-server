@@ -13,6 +13,8 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true, minlength: 8 },
   email: { type: String, required: true, unique: true },
   role: { type: String, enum: roles },
+  firstName: { type: String },
+  lastName: { type: String },
 });
 
 export const UserModel = mongoose.model("User", UserSchema);
