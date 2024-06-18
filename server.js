@@ -39,6 +39,8 @@ app.use("/api/book-transactions", bookTransactionRoutes);
 // Mount user routes on the '/api/users' path for user management functionalities
 app.use("/api/users", userRoutes);
 
+app.get("/api/", (req, res) => res.send("Hello From Server. App is working."));
+
 const PORT = config.PORT || 5000;
 
 // Connect to the database
