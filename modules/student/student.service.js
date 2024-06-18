@@ -1,5 +1,5 @@
 import Student from "../../models/Student.js";
-import isNotEmptyArray from "../../utils/helpers.js";
+import { isNotEmptyArray } from "../../utils/helpers.js";
 import logger from "../../utils/logger.js";
 
 const studentService = {
@@ -7,12 +7,15 @@ const studentService = {
   getAllStudents: async () => {
     try {
       const students = await Student.find({ isDeleted: false });
+      const totalStudentsCount = await Student.countDocuments({
+        isDeleted: false,
+      });
       if (isNotEmptyArray(students)) {
         logger.info(`Students retrieved successfully: ${students}`);
       } else {
         logger.info("No student found");
       }
-      return students;
+      return { students, totalStudentsCount };
     } catch (error) {
       logger.error(`Error retrieving students : ${error.message}`);
       throw new Error(error.message);
@@ -22,13 +25,13 @@ const studentService = {
   // Retrieve a student by their ID from the database
   getStudentById: async (id) => {
     try {
-      const student = await Student.find({ studentId: id, isDeleted: false });
-      if (!isNotEmptyArray(student)) {
+      const student = await Student.find({ _id: id, isDeleted: false });
+      if (!student) {
         logger.info("No students found");
-        throw new Error("Student not found");
+        return null;
       }
       logger.info(`Student retrieved successfully: ${student[0].name}`);
-      return student[0];
+      return student;
     } catch (error) {
       logger.error(`Error retrieving student: ${error.message}`);
       throw new Error(error.message);

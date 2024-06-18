@@ -1,19 +1,29 @@
 import mongoose from "mongoose";
 import Book from "../../models/Book.js";
-import isNotEmptyArray from "../../utils/helpers.js";
+import { isNotEmptyArray } from "../../utils/helpers.js";
 import logger from "../../utils/logger.js";
+import BookTransaction from "../../models/BookTransaction.js";
 
 const bookService = {
   // Retrieve all books from the database
   getAllBooks: async () => {
     try {
-      const books = await Book.find({ isDeleted: false });
-      if (isNotEmptyArray(books)) {
-        logger.info(`Books retrieved successfully: ${books}`);
+      const issuedBooks = await BookTransaction.find({
+        status: "issued",
+      }).distinct("bookId");
+      const availableBooks = await Book.find({
+        isDeleted: false,
+      });
+
+      const totalBooksCount = await Book.countDocuments({ isDeleted: false });
+      if (isNotEmptyArray(availableBooks)) {
+        logger.info(
+          `Available books retrieved successfully: ${availableBooks}`
+        );
       } else {
-        logger.info("No Book found");
+        logger.info("No available books found");
       }
-      return books;
+      return { books: availableBooks, totalBooksCount };
     } catch (error) {
       logger.error(`Error retrieving books: ${error.message}`);
       throw new Error(error.message);
@@ -23,13 +33,15 @@ const bookService = {
   // Retrieve a book by their ID from the database
   getBookById: async (id) => {
     try {
-      const book = await Book.find({ bookId: id, isDeleted: false });
-      if (!isNotEmptyArray(book)) {
+      const book = await Book.findOne({ _id: id, isDeleted: false });
+
+      if (!book) {
         logger.info("No Book found");
-        throw new Error("Book not found");
+        return null;
       }
-      logger.info(`Book retrieved successfully: ${book[0].title}`);
-      return book[0];
+
+      logger.info(`Book retrieved successfully: ${JSON.stringify(book)}`);
+      return book;
     } catch (error) {
       logger.error(`Error retrieving book: ${error.message}`);
       throw new Error(error.message);

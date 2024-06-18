@@ -1,12 +1,16 @@
 import BookTransaction from "../../models/BookTransaction.js";
-
+import { setDueDate } from "../../utils/helpers.js";
 import logger from "../../utils/logger.js";
 
 const bookLendingService = {
   // Create a new book lending record
   createLending: async (lendingData) => {
     try {
-      const newLending = new BookTransaction(lendingData);
+      const newLending = new BookTransaction({
+        ...lendingData,
+        dueDate: setDueDate(1),
+      });
+
       const savedLending = await newLending.save();
       logger.info(`Book lending created successfully: ${savedLending._id}`);
       return savedLending;
@@ -20,7 +24,7 @@ const bookLendingService = {
   getAllLendings: async () => {
     try {
       const allLendings = await BookTransaction.find();
-      logger.info(`All book lending records retrieved`);
+      logger.info("All book lending records retrieved");
       return allLendings;
     } catch (error) {
       logger.error(
@@ -49,22 +53,16 @@ const bookLendingService = {
   // Update the returned date of a book
   updateReturnedDate: async (lendingId) => {
     try {
-      logger.info(
-        `Updating returned date for book lending record with ID: ${lendingId}`
-      );
       const lending = await BookTransaction.findById(lendingId);
       if (!lending) {
         logger.info("Book lending record not found");
         return null;
       }
-      const updatedLending = await BookTransaction.findByIdAndUpdate(
-        lendingId,
-        { returnedDate: Date.now() },
-        { new: true }
-      );
-
+      lending.returnedDate = Date.now();
+      lending.status = "returned";
+      const updatedLending = await lending.save();
       logger.info(
-        `Book lending record updated successfully: Returned date set for ${updatedLending._id}`
+        `Book lending record updated successfully: ${updatedLending._id}`
       );
       return updatedLending;
     } catch (error) {
@@ -74,7 +72,7 @@ const bookLendingService = {
   },
 
   // Create a new book renewal record
-  async createRenewal(renewalData) {
+  createRenewal: async (renewalData) => {
     try {
       const { lendingId, ...rest } = renewalData;
       if (!lendingId) {
@@ -87,23 +85,18 @@ const bookLendingService = {
         throw new Error("Book lending record not found for renewal");
       }
 
-      const renewalLimit = 2;
+      const renewalLimit = 3;
 
       if (lending.renewalCount >= renewalLimit) {
         logger.info("Cannot renew book, renewal limit reached");
         throw new Error("Cannot renew book, renewal limit reached");
       }
-
       lending.renewalCount++;
-
-      await lending.save();
-
-      rest.renewalDate = new Date();
-      const expiryDate = new Date();
-      expiryDate.setMonth(expiryDate.getMonth() + 1);
-      rest.expiryDate = expiryDate;
-
-      return lending;
+      lending.dueDate = setDueDate(1);
+      lending.renewalDate = Date.now();
+      const updatedLending = await lending.save();
+      logger.info(`Book renewed successfully: ${updatedLending._id}`);
+      return updatedLending;
     } catch (error) {
       logger.error(`Error creating book renewal: ${error.message}`);
       throw new Error(error.message);
@@ -116,21 +109,25 @@ const bookLendingService = {
       const returnedBooks = await BookTransaction.find({
         returnedDate: { $ne: null },
       });
+      logger.info("All returned books retrieved");
       return returnedBooks;
     } catch (error) {
       logger.error(`Error retrieving returned books: ${error.message}`);
       throw new Error(error.message);
     }
   },
+
   // Retrieve transactions by student ID
   getTransactionByStudentId: async (studentId) => {
     try {
-      const transactions = await BookTransaction.find({ studentId: studentId });
-      if (!transactions || transactions.length === 0) {
-        logger.info(`No transactions found for student ID: ${studentId}`);
-        throw new Error(`No transactions found for student ID: ${studentId}`);
-      }
-      return transactions;
+      const transactions = await BookTransaction.find({
+        studentId: studentId,
+        // status: "issued",
+      }).populate("bookId");
+
+      const issuedBooksCount = transactions.length;
+      logger.info(`Transactions retrieved for student ID: ${studentId}`);
+      return { transactions, issuedBooksCount };
     } catch (error) {
       logger.error(
         `Error retrieving transactions for student ID: ${studentId}, ${error.message}`
@@ -142,12 +139,14 @@ const bookLendingService = {
   // Retrieve transactions by book ID
   getTransactionByBookId: async (bookId) => {
     try {
-      const transactions = await BookTransaction.find({ bookId: bookId });
-      if (!transactions || transactions.length === 0) {
-        logger.info(`No transactions found for book ID: ${bookId}`);
-        throw new Error(`No transactions found for book ID: ${bookId}`);
-      }
-      return transactions;
+      const transactions = await BookTransaction.find({
+        bookId: bookId,
+        status: "issued",
+      }).populate("studentId");
+
+      const assignedBorrowersCount = transactions.length;
+      logger.info(`Transactions retrieved for book ID: ${bookId}`);
+      return { transactions, assignedBorrowersCount };
     } catch (error) {
       logger.error(
         `Error retrieving transactions for book ID: ${bookId}, ${error.message}`

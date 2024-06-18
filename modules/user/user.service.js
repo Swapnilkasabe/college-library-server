@@ -129,6 +129,31 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// Get user profile
+export const getProfile = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const user = await UserModel.findById(userId).select(
+      "firstName lastName email profilePicture"
+    );
+    if (!user) {
+      return sendResponse(res, responseCodes.NOT_FOUND, {
+        error: "User not found",
+      });
+    }
+    return sendResponse(res, responseCodes.SUCCESS, {
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    logger.error(`Error fetching user profile: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};
+
 // Logout service function
 export const logout = async (req, res) => {
   try {

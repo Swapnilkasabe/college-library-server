@@ -27,11 +27,6 @@ const bookLendingController = {
     const lendingId = req.params.lendingId;
     try {
       const lending = await bookLendingService.findLendingById(lendingId);
-      if (!lending) {
-        return sendResponse(res, responseCodes.NOT_FOUND, {
-          error: "Book lending record not found",
-        });
-      }
       sendResponse(res, responseCodes.SUCCESS, lending);
       logger.info(`Book lending record retrieved successfully: ${lending._id}`);
     } catch (error) {
@@ -56,7 +51,7 @@ const bookLendingController = {
       }
       sendResponse(res, responseCodes.SUCCESS, {
         message: "Book returned successfully",
-        lending: updatedLending,
+        updatedLending,
       });
       logger.info(
         `Book lending record updated successfully: Returned date set for ${updatedLending._id}`
@@ -120,16 +115,24 @@ const bookLendingController = {
       });
     }
   },
+
   // Retrieve transactions by student ID
   getTransactionByStudentId: async (req, res) => {
     const studentId = req.params.studentId;
     try {
-      const transactions = await bookLendingService.getTransactionByStudentId(
-        studentId
-      );
-      sendResponse(res, responseCodes.SUCCESS, transactions);
+      const { transactions, issuedBooksCount } =
+        await bookLendingService.getTransactionByStudentId(studentId);
+      if (transactions.length === 0) {
+        return sendResponse(res, responseCodes.NOT_FOUND, {
+          error: `No transactions found for student ID: ${studentId}`,
+        });
+      }
+      sendResponse(res, responseCodes.SUCCESS, {
+        books: transactions,
+        total: issuedBooksCount,
+      });
       logger.info(
-        "Transactions retrieved successfully for student: " + studentId
+        `Transactions retrieved successfully for student: ${studentId}`
       );
     } catch (error) {
       logger.error(
@@ -140,15 +143,23 @@ const bookLendingController = {
       });
     }
   },
+
   // Retrieve transactions by book ID
   getTransactionByBookId: async (req, res) => {
     const bookId = req.params.bookId;
     try {
-      const transactions = await bookLendingService.getTransactionByBookId(
-        bookId
-      );
-      sendResponse(res, responseCodes.SUCCESS, transactions);
-      logger.info("Transactions retrieved successfully for book: " + bookId);
+      const { transactions, assignedBorrowersCount } =
+        await bookLendingService.getTransactionByBookId(bookId);
+      if (transactions.length === 0) {
+        return sendResponse(res, responseCodes.NOT_FOUND, {
+          error: `No transactions found for book ID: ${bookId}`,
+        });
+      }
+      sendResponse(res, responseCodes.SUCCESS, {
+        students: transactions,
+        total: assignedBorrowersCount,
+      });
+      logger.info(`Transactions retrieved successfully for book: ${bookId}`);
     } catch (error) {
       logger.error(
         `Error retrieving transactions for book: ${bookId}, ${error.message}`

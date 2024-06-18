@@ -13,6 +13,8 @@ router.get(
 );
 // Get all book lending records
 router.get("/", verifyToken, bookTransactionController.getAllLendings);
+
+// Return a book
 router.put(
   "/:lendingId/return",
   verifyToken,

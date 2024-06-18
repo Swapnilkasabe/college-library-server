@@ -11,15 +11,15 @@ import { authorizeAdmin } from "../modules/auth/auth.controller.js";
 import { verifyToken } from "../modules/auth/auth.service.js";
 
 // Get all books (public route)
-router.get("/", verifyToken, bookController.getAllBooks);
+router.get("/", bookController.getAllBooks);
 // Get a book by ID (public route)
-router.get("/:id", verifyToken, bookController.getBookById);
+router.get("/:id", bookController.getBookById);
 
 // Create a new book (private route with admin authorization)
 router.post(
   "/",
   verifyToken,
-  authorizeAdmin,
+  // authorizeAdmin,
   validateBookCreation,
   validation,
   bookController.createBook
@@ -29,7 +29,7 @@ router.post(
 router.put(
   "/:id",
   verifyToken,
-  authorizeAdmin,
+  // authorizeAdmin,
   validateBookUpdate,
   validation,
   bookController.updateBookById
@@ -39,7 +39,7 @@ router.put(
 router.delete(
   "/:id",
   verifyToken,
-  authorizeAdmin,
+  // authorizeAdmin,
   bookController.deleteBookById
 );
 

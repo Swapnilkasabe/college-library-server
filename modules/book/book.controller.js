@@ -7,8 +7,8 @@ const bookController = {
   // Retrieve all books using the book service and send the response
   getAllBooks: async (req, res) => {
     try {
-      const books = await bookService.getAllBooks();
-      sendResponse(res, responseCodes.SUCCESS, { books });
+      const { books, totalBooksCount } = await bookService.getAllBooks();
+      sendResponse(res, responseCodes.SUCCESS, { books, totalBooksCount });
       logger.info(`books retrieved successfully: ${books}`);
     } catch (error) {
       logger.error(`Error retrieving books: ${error.message}`);
@@ -18,13 +18,18 @@ const bookController = {
     }
   },
 
-  // Retrieve a book by thier ID using the book service and send the response
+  // Retrieve a book by their ID using the book service and send the response
   getBookById: async (req, res) => {
     const id = req.params.id;
     try {
       const book = await bookService.getBookById(id);
-      sendResponse(res, responseCodes.SUCCESS, book[0]);
-      logger.info(`Book retrieved successfully: ${book[0].title}`);
+      if (!book) {
+        logger.info(`Book not found with id: ${id}`);
+        return sendResponse(res, responseCodes.NOT_FOUND, {
+          error: "Book not found",
+        });
+      }
+      sendResponse(res, responseCodes.SUCCESS, book);
     } catch (error) {
       logger.error(`Error retrieving book: ${error.message}`);
       sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
