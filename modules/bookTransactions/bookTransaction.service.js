@@ -122,7 +122,7 @@ const bookLendingService = {
     try {
       const transactions = await BookTransaction.find({
         studentId: studentId,
-        // status: "issued",
+        status: "issued",
       }).populate("bookId");
 
       const issuedBooksCount = transactions.length;
