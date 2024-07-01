@@ -12,10 +12,11 @@ import { responseCodes } from "../../utils/constants.js";
 export const signup = async (req, res) => {
   const srcFn = "signup";
   try {
-    const { username, email, password, role } = req.body;
+    const { firstName, lastName, email, password, role } = req.body;
     const hashedPassword = await hashPassword(password);
     const newUser = new UserModel({
-      username,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
       role,
@@ -25,7 +26,7 @@ export const signup = async (req, res) => {
     return sendResponse(res, responseCodes.SUCCESS, {
       success: true,
       message: "User signed up successfully",
-      user: newUser._id,
+      user: newUser.email,
     });
   } catch (error) {
     logger.error(`Error signing up user: ${error.message}`);
@@ -132,10 +133,9 @@ export const resetPassword = async (req, res) => {
 // Get user profile
 export const getProfile = async (req, res) => {
   const userId = req.user._id;
-
   try {
     const user = await UserModel.findById(userId).select(
-      "firstName lastName email profilePicture"
+      "firstName lastName email"
     );
     if (!user) {
       return sendResponse(res, responseCodes.NOT_FOUND, {
@@ -144,8 +144,24 @@ export const getProfile = async (req, res) => {
     }
     return sendResponse(res, responseCodes.SUCCESS, {
       success: true,
-      data: user,
+      data: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
     });
+  } catch (error) {
+    logger.error(`Error fetching user profile: ${error.message}`);
+    return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
+      error: error.message,
+    });
+  }
+};
+
+export const getUser = async (email, res) => {
+  try {
+    const user = await UserModel.find({ email });
+    return user[0];
   } catch (error) {
     logger.error(`Error fetching user profile: ${error.message}`);
     return sendResponse(res, responseCodes.INTERNAL_SERVER_ERROR, {
