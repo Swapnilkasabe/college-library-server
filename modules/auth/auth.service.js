@@ -12,7 +12,8 @@ dotenv.config();
 //Fuction to generate auth token
 export const generateAuthToken = (user) => {
   const payload = {
-    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     role: user.role,
   };

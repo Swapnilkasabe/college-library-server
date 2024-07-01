@@ -15,7 +15,8 @@ const validation = (req, res, next) => {
 
 // Validation function for user signup
 const validateSignup = [
-  body("username").trim().notEmpty().withMessage("Username is required"),
+  body("firstName").trim().notEmpty().withMessage("First Name is required"),
+  body("lastName").trim().notEmpty().withMessage("Last Name is required"),
   body("email").isEmail().withMessage("Invalid email format"),
   body("password")
     .isLength({ min: 4, max: 10 })

@@ -8,14 +8,16 @@ const bookService = {
   // Retrieve all books from the database
   getAllBooks: async () => {
     try {
-      const issuedBooks = await BookTransaction.find({
-        status: "issued",
-      }).distinct("bookId");
       const availableBooks = await Book.find({
         isDeleted: false,
       });
 
-      const totalBooksCount = await Book.countDocuments({ isDeleted: false });
+      const issuedBooks = await BookTransaction.find({
+        status: "issued",
+      }).distinct("bookId");
+
+      const totalBooksCount = availableBooks.length + issuedBooks.length;
+
       if (isNotEmptyArray(availableBooks)) {
         logger.info(
           `Available books retrieved successfully: ${availableBooks}`
