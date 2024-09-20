@@ -30,6 +30,8 @@ const BookTransactionSchema = new mongoose.Schema({
   dueDate: { type: Date, required: true },
 });
 
+BookTransactionSchema.index({ studentId: 1, bookId: 1, borrowedDate: 1 });
+
 const BookTransaction = mongoose.model(
   "BookTransaction",
   BookTransactionSchema
