@@ -10,6 +10,8 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: roles },
 });
 
+UserSchema.index({ email: 1 });
+
 export const UserModel = mongoose.model("User", UserSchema);
 
 export default UserModel;
