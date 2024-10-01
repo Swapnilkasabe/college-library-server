@@ -14,12 +14,22 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://college-library-ui.vercel.app",
+];
+
 // Define the CORS options
 const corsOptions = {
   credentials: true,
-  origin: ["http://localhost:3000", "https://college-library-ui.vercel.app"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-  preflightContinue: false,
   optionsSuccessStatus: 204,
 };
 
