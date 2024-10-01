@@ -17,7 +17,7 @@ const app = express();
 // Define the CORS options
 const corsOptions = {
   credentials: true,
-  origin: ["http://localhost:3000", "https://college-library-ui.vercel.app/"], // Whitelist the domains you want to allow
+  origin: ["http://localhost:3000", "https://college-library-ui.vercel.app"],
 };
 
 // Enable CORS for all routes
