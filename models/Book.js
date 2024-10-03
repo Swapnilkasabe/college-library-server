@@ -13,8 +13,6 @@ const bookSchema = new mongoose.Schema({
   isDeleted: { type: Boolean, default: false },
 });
 
-bookSchema.index({ title: 1, author: 1, bookId: 1 });
-
 const Book = mongoose.model("Book", bookSchema);
 
 export default Book;
