@@ -17,6 +17,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://college-library-ui.vercel.app",
+  "https://college-library-server.vercel.app",
 ];
 
 // Define the CORS options
