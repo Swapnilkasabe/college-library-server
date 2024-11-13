@@ -22,7 +22,6 @@ const allowedOrigins = [
 
 // Define the CORS options
 const corsOptions = {
-  credentials: true,
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -37,6 +36,8 @@ const corsOptions = {
 
 // Enable CORS for all routes
 app.use(cors(corsOptions));
+// Handle preflight requests for all routes
+app.options("*", cors(corsOptions));
 // Parse incoming JSON data
 app.use(express.json({ extended: true }));
 // Parse URL-encoded form data
